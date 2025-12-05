@@ -19,6 +19,7 @@ export interface Profile {
   id: string;
   name: string;
   color: string;
+  avatarUrl?: string;
   createdAt: string;
 }
 

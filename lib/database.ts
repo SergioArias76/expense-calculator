@@ -98,7 +98,17 @@ export async function getExpenses(profileId: string): Promise<Expense[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  if (error) throw error;
+  
+  return (data || []).map(item => ({
+    id: item.id,
+    title: item.title,
+    amount: item.amount,
+    type: item.type,
+    currentPayment: item.current_payment,
+    totalPayments: item.total_payments,
+    createdAt: item.created_at
+  }));
 }
 
 export async function createExpense(profileId: string, expense: Omit<Expense, 'id' | 'createdAt'>): Promise<Expense> {
@@ -151,3 +161,52 @@ export async function deleteExpense(expenseId: string): Promise<void> {
 
   if (error) throw error;
 }
+
+// Avatar storage functions
+export async function uploadProfileAvatar(userId: string, profileId: string, file: File): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userId}/${profileId}.${fileExt}`;
+  
+  const { error: uploadError } = await supabase.storage
+    .from('profile-avatars')
+    .upload(fileName, file, { upsert: true });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage
+    .from('profile-avatars')
+    .getPublicUrl(fileName);
+
+  // Add timestamp to prevent browser caching
+  return `${data.publicUrl}?t=${new Date().getTime()}`;
+}
+
+export async function updateProfileAvatar(profileId: string, avatarUrl: string): Promise<void> {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: avatarUrl })
+    .eq('id', profileId);
+
+  if (error) throw error;
+}
+
+export async function deleteProfileAvatar(userId: string, profileId: string, avatarUrl: string): Promise<void> {
+  // Extract filename from URL
+  const urlParts = avatarUrl.split('/');
+  const fileName = `${userId}/${urlParts[urlParts.length - 1]}`;
+
+  const { error: deleteError } = await supabase.storage
+    .from('profile-avatars')
+    .remove([fileName]);
+
+  if (deleteError) throw deleteError;
+
+  // Clear avatar_url in database
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ avatar_url: null })
+    .eq('id', profileId);
+
+  if (updateError) throw updateError;
+}
+

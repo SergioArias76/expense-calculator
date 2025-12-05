@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   color TEXT NOT NULL,
+  avatar_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -109,3 +110,34 @@ CREATE POLICY "Users can delete own expenses"
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_expenses_profile_id ON expenses(profile_id);
 CREATE INDEX IF NOT EXISTS idx_profile_data_profile_id ON profile_data(profile_id);
+
+-- Storage: Create bucket for profile avatars
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('profile-avatars', 'profile-avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage Policies for profile-avatars bucket
+CREATE POLICY "Users can upload own avatars"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'profile-avatars' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Users can update own avatars"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'profile-avatars' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Users can delete own avatars"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'profile-avatars' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Anyone can view avatars"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'profile-avatars');

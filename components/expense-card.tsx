@@ -68,19 +68,25 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
             {getTypeBadge()}
             {expense.type === 'installment' && expense.currentPayment && expense.totalPayments && (
               <span className="text-xs text-muted-foreground font-medium">
-                {expense.currentPayment}/{expense.totalPayments}
+                Cuota {expense.currentPayment} de {expense.totalPayments}
               </span>
             )}
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="text-right">
-            <p className={`text-xl font-bold ${isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-              {formatCurrency(expense.amount)}
+            <p className="text-sm text-muted-foreground mr-1">
+              {expense.type === 'installment' ? 'Valor cuota' : 'Monto'}
             </p>
-            {expense.type === 'installment' && expense.totalPayments && expense.totalPayments > 0 && (
+            <p className={`text-xl font-bold ${isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+              {expense.type === 'installment' && expense.totalPayments
+                ? formatCurrency(expense.amount / expense.totalPayments)
+                : formatCurrency(expense.amount)
+              }
+            </p>
+            {expense.type === 'installment' && (
               <p className="text-xs text-muted-foreground mt-1">
-                {formatCurrency(expense.amount / expense.totalPayments)}/mes
+                Total deuda: {formatCurrency(expense.amount)}
               </p>
             )}
           </div>

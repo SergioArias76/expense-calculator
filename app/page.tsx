@@ -127,9 +127,17 @@ export default function Home() {
     setActiveProfileId(profileId);
   };
 
-  const handleCreateProfile = async (name: string, color: string) => {
+  const handleCreateProfile = async (name: string, color: string, avatarFile?: File) => {
     try {
       const newProfile = await db.createProfile(user!.id, name, color);
+      
+      // Upload avatar if provided
+      if (avatarFile) {
+        const avatarUrl = await db.uploadProfileAvatar(user!.id, newProfile.id, avatarFile);
+        await db.updateProfileAvatar(newProfile.id, avatarUrl);
+        newProfile.avatarUrl = avatarUrl;
+      }
+      
       setProfiles(prev => [...prev, newProfile]);
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -163,6 +171,34 @@ export default function Home() {
     } catch (error) {
       console.error('Error updating profile name:', error);
       alert('Error al actualizar el nombre del perfil');
+    }
+  };
+
+  const handleUpdateProfileAvatar = async (profileId: string, file: File) => {
+    try {
+      const avatarUrl = await db.uploadProfileAvatar(user!.id, profileId, file);
+      await db.updateProfileAvatar(profileId, avatarUrl);
+      setProfiles(prev => prev.map(p => 
+        p.id === profileId ? { ...p, avatarUrl } : p
+      ));
+    } catch (error) {
+      console.error('Error updating profile avatar:', error);
+      alert('Error al actualizar la foto de perfil');
+    }
+  };
+
+  const handleDeleteProfileAvatar = async (profileId: string) => {
+    try {
+      const profile = profiles.find(p => p.id === profileId);
+      if (profile?.avatarUrl) {
+        await db.deleteProfileAvatar(user!.id, profileId, profile.avatarUrl);
+        setProfiles(prev => prev.map(p => 
+          p.id === profileId ? { ...p, avatarUrl: undefined } : p
+        ));
+      }
+    } catch (error) {
+      console.error('Error deleting profile avatar:', error);
+      alert('Error al eliminar la foto de perfil');
     }
   };
 
@@ -327,6 +363,8 @@ export default function Home() {
         onCreateProfile={handleCreateProfile}
         onDeleteProfile={handleDeleteProfile}
         onUpdateProfileName={handleUpdateProfileName}
+        onUpdateProfileAvatar={handleUpdateProfileAvatar}
+        onDeleteProfileAvatar={handleDeleteProfileAvatar}
       />
     </div>
   );

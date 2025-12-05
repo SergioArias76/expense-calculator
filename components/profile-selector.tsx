@@ -1,8 +1,9 @@
 'use client';
 
 import { Profile } from '@/lib/types';
-import { ChevronDown, Plus, Settings } from 'lucide-react';
+import { ChevronDown, Plus, Settings, User } from 'lucide-react';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface ProfileSelectorProps {
   profiles: Profile[];
@@ -26,10 +27,24 @@ export function ProfileSelector({
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-4 py-2 rounded-lg bg-foreground/5 hover:bg-foreground/10 transition-colors border border-border"
       >
-        <div 
-          className="w-3 h-3 rounded-full" 
-          style={{ backgroundColor: activeProfile?.color }}
-        />
+        {activeProfile?.avatarUrl ? (
+          <div className="w-6 h-6 rounded-full overflow-hidden border border-border">
+            <Image
+              src={activeProfile.avatarUrl}
+              alt={activeProfile.name}
+              width={24}
+              height={24}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        ) : (
+          <div 
+            className="w-6 h-6 rounded-full flex items-center justify-center" 
+            style={{ backgroundColor: activeProfile?.color + '20' }}
+          >
+            <User className="w-4 h-4" style={{ color: activeProfile?.color }} />
+          </div>
+        )}
         <span className="font-medium text-foreground">{activeProfile?.name}</span>
         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -55,11 +70,25 @@ export function ProfileSelector({
                       : 'hover:bg-foreground/5'
                   }`}
                 >
-                  <div 
-                    className="w-3 h-3 rounded-full flex-shrink-0" 
-                    style={{ backgroundColor: profile.color }}
-                  />
-                  <span className="font-medium text-foreground text-sm">{profile.name}</span>
+                  {profile.avatarUrl ? (
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-border flex-shrink-0">
+                      <Image
+                        src={profile.avatarUrl}
+                        alt={profile.name}
+                        width={32}
+                        height={32}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" 
+                      style={{ backgroundColor: profile.color + '20' }}
+                    >
+                      <User className="w-5 h-5" style={{ color: profile.color }} />
+                    </div>
+                  )}
+                  <span className="font-medium text-foreground text-sm flex-1">{profile.name}</span>
                   {profile.id === activeProfileId && (
                     <span className="ml-auto text-xs text-muted-foreground">✓</span>
                   )}
