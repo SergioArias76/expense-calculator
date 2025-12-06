@@ -52,7 +52,7 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
 
   return (
     <div className={`expense-card-minimal rounded-lg p-5 animate-slide-up ${isCompleted ? 'opacity-60' : ''}`}>
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-base font-semibold text-foreground">

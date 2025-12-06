@@ -50,7 +50,7 @@ export function SummaryCards({ salary, totalExpenses, expenseCount, expenses }: 
   return (
     <>
       {/* Main Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div className="summary-card-minimal neutral rounded-lg p-5 border-2">
           <p className="text-xs font-medium opacity-80 mb-1 uppercase tracking-wide">Total Gastos</p>
           <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>

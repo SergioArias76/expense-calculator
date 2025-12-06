@@ -14,6 +14,7 @@ import { ComparisonChart } from '@/components/comparison-chart';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { ProfileSelector } from '@/components/profile-selector';
 import { ProfileManager } from '@/components/profile-manager';
+import { ProfileSelectionScreen } from '@/components/profile-selection-screen';
 import { Plus, Wallet, TrendingUp, LogOut, Loader2 } from 'lucide-react';
 import * as db from '@/lib/database';
 
@@ -59,7 +60,8 @@ export default function Home() {
         setActiveProfileId(defaultProfile.id);
       } else {
         setProfiles(userProfiles);
-        setActiveProfileId(userProfiles[0].id);
+        // Don't auto-select profile to show selection screen
+        // setActiveProfileId(userProfiles[0].id);
       }
     } catch (error) {
       console.error('Error loading profiles:', error);
@@ -243,23 +245,33 @@ export default function Home() {
     );
   }
 
+  if (!activeProfileId && profiles.length > 0) {
+    return (
+      <ProfileSelectionScreen
+        profiles={profiles}
+        onSelectProfile={handleProfileChange}
+        onCreateProfile={() => setIsProfileManagerOpen(true)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen minimalist-bg">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="p-2.5 bg-foreground/5 rounded-lg">
               <Wallet className="w-6 h-6 text-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Calculadora de Gastos</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Calculadora de Gastos</h1>
               <p className="text-muted-foreground text-sm">
                 {user.email}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-between md:justify-end">
             <ProfileSelector
               profiles={profiles}
               activeProfileId={activeProfileId}
@@ -276,10 +288,10 @@ export default function Home() {
             </button>
             <button
               onClick={() => setIsDialogOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-foreground text-background rounded-lg font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-foreground text-background rounded-lg font-medium hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
-              Agregar Gasto
+              <span className="hidden md:inline">Agregar Gasto</span>
             </button>
           </div>
         </div>
